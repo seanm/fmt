@@ -2029,8 +2029,9 @@ template <typename Context> class basic_format_args {
 // between clang and gcc on ARM (#1919).
 using format_args = basic_format_args<format_context>;
 
-// We cannot use enum classes as bit fields because of a gcc bug
+// We cannot use enum classes as bit fields because of a gcc bug before 9.3
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61414.
+#if FMT_GCC_VERSION && FMT_GCC_VERSION < 903
 namespace align {
 enum type { none, left, right, center, numeric };
 }
@@ -2038,6 +2039,15 @@ using align_t = align::type;
 namespace sign {
 enum type { none, minus, plus, space };
 }
+#else
+namespace align {
+enum type : unsigned char { none, left, right, center, numeric };
+}
+using align_t = align::type;
+namespace sign {
+enum type : unsigned char { none, minus, plus, space };
+}
+#endif
 using sign_t = sign::type;
 
 FMT_BEGIN_DETAIL_NAMESPACE
